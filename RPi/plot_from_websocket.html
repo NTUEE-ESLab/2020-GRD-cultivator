@@ -1,0 +1,154 @@
+<!-- ref: https://github.com/dannyvai/plotly_websocket_example -->
+<html>
+
+<script src="https://canvasjs.com/assets/script/canvasjs.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.2/jquery.min.js"></script>
+<script>
+
+    ws = new WebSocket("ws://127.0.0.1:8866")
+    var request_data_interval
+
+    var dps_x = [];
+    var dps_y = [];
+    var dps_z = [];
+    var dataLength = 20;
+    var chart
+
+    var img1 = document.createElement('img');
+    img1.src = "reading_near.jpg";
+    var img2 = document.createElement('img');
+    img2.src = "reading_long.jpg";
+
+
+    ws.onopen = function()
+    {
+        // Web Socket is connected, send data using send()
+        ws.send("Message to send");
+        chart = new CanvasJS.Chart("chartContainer", {
+            title :{ text: "Dynamic Data of GRD cultivator" },
+            axisX: { title: "time (s)"},
+            axisY: { title: "Distance (mm)", includeZero: false },
+            data: [{
+                type: "spline",
+                name: "x",
+                //showInLegend: true,
+                dataPoints: dps_x
+            }]
+        });
+        request_data_interval = window.setInterval(requestData, 50);
+
+    };
+
+
+
+
+
+    var dps_x = [];
+    var dataLength = 20;
+    var reading_near = false;
+    var reading_long = false;
+    var image_print1 = false;
+    var image_print2 = false;
+    /*
+    window.onload = function () {
+
+        var chart = new CanvasJS.Chart("chartContainer", {
+            title :{
+                text: "Dynamic Data"
+            },
+            data: [{
+                type: "spline",
+                dataPoints: dps_x
+            }]
+        });
+
+        var xVal = 0;
+        var yVal = 100;
+        var updateInterval = 1000;
+        var dataLength = 20; // number of dataPoints visible at any point
+
+
+    };
+    */
+    //updateChart(dataLength);
+    //setInterval(function(){updateChart()}, updateInterval);}
+
+    ws.onmessage = function (evt)
+    {
+        var received_msg = evt.data;
+        data = JSON.parse(evt.data);
+
+        dps_x.push({x: data.time, y: data.val})
+        reading_near = data.near;
+        reading_long = data.long;
+
+
+        if (dps_x.length > dataLength) {
+            dps_x.shift();
+
+        }
+
+
+        chart.render();
+
+        if(reading_long == false && reading_near == false)
+        {
+            if(image_print1 == true)
+            {
+                document.getElementById('image').removeChild(img1);
+                image_print1 = false;
+            }
+            if(image_print2 == true)
+            {
+                document.getElementById('image').removeChild(img2);
+                image_print2 = false;
+            }
+            //chart.render();
+        }
+        else if(reading_long == true)
+        {
+            if(image_print1 == true)
+            {
+                document.getElementById('image').removeChild(img1);
+                image_print1 = false;
+            }
+            if(image_print2 == false)
+            {
+                document.getElementById('image').appendChild(img2);
+                image_print2 = true;
+            }
+        }
+        else if(reading_near == true)
+        {
+            if(image_print1 == false)
+            {
+                document.getElementById('image').appendChild(img1);
+                image_print1 = true;
+            }
+        }
+
+
+
+
+    };
+
+ws.onclose = function()
+    {
+      // websocket is closed.
+      window.clearInterval(request_data_interval)
+    };
+
+    function requestData()
+    {
+        ws.send("get-data");
+    }
+
+
+</script>
+<body>
+
+
+<div id="chartContainer" style="height: 370px; max-width: 920px; margin: 0px auto;"></div>
+<div id="image"></div>
+</body>
+</html>

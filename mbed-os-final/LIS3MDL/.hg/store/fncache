@@ -1,0 +1,7 @@
+data/magneto.h.i
+data/X_NUCLEO_COMMON.lib.i
+data/lis3mdl_class.cpp.i
+data/readme.txt.i
+data/lis3mdl_class.h.i
+data/lis3mdl.h.i
+data/ST_INTERFACES.lib.i

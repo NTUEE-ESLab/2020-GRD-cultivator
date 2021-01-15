@@ -1,0 +1,4 @@
+^BUILD$
+^.mbed$
+^X_NUCLEO_COMMON$
+^ST_INTERFACES$
